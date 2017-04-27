@@ -2,9 +2,11 @@ package com.campiador.respdroid;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,8 +22,13 @@ import android.widget.TextView;
 import java.io.File;
 import java.util.ArrayList;
 
+
+//IMPORTANT NOTE: THREAD START RUNS ON ANOTHER THREAD, WHEREAS RUN RUNS ON THE UI THREAD
+
 public class MainActivity extends AppCompatActivity {
 
+    public static final String MYTAG = "RESPDROID_DYNAMIC";
+    public static final String SDCARD_PICTURES = "/sdcard/Pictures/";
     private ImageView imageView;
     private TextView textView;
 
@@ -39,8 +46,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
 
 
         imageView = (ImageView) findViewById(R.id.imageView);
@@ -69,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
         percentList.add(100);
 
 
-
 //        for (String name: imgList
 //             ) {
 //            for (int percentage: percentList
@@ -77,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
 //                loadImage(name, percentage);
 //            }
 //        }
+
 
         ArrayAdapter<Integer> percentAdapter = new ArrayAdapter<Integer>(this,
                 android.R.layout.simple_spinner_item, percentList);
@@ -126,39 +131,36 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+//    testImages();
+//        testOneImage();
 
     }
 
     private void loadImage(String imgName, int percent) {
 
-        File img = new File("/sdcard/Pictures/" + imgName +"." + percent + ".jpg");
+        String fileName = imgName + "." + percent + ".jpg";
+        File img = new File(SDCARD_PICTURES + fileName);
 
+        //INSTRUMENTATION: insert before (1 line)
         long startnow = android.os.SystemClock.uptimeMillis();
 
-
         Bitmap bitmap = BitmapFactory.decodeFile(img.getAbsolutePath());
+
+        //INSTRUMENTATION: insert after (10 lines)
         long endnow = android.os.SystemClock.uptimeMillis();
         long duration = endnow - startnow;
-
-
-
-        imageView.setImageBitmap(bitmap);
-
-        String responsiveness = "responsive execution: ";
-
-
-
+        String responsiveness = "responsive: ";
         if (duration > 100 && duration < 200) {
             responsiveness = "soft unresponsive execution: ";
         } else if (duration >= 200) {
             responsiveness = "hard unresponsive execution: ";
-
         }
+        //LOG RESULTS
+        Log.d(MYTAG, "--" + responsiveness + "--" + duration + "--" + "ms" + "--"
+                + fileName + "--" + img.length() + "--" + android.os.Build.MODEL);
 
+        imageView.setImageBitmap(bitmap);
         textView.setText(responsiveness + duration + " ms\n");
-
-
-        Log.d("MYTAG", responsiveness + duration + " ms\n");
     }
 
     // Storage Permissions
@@ -170,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Checks if the app has permission to write to device storage
-     *
+     * <p>
      * If the app does not has permission then the user will be prompted to grant permissions
      *
      * @param activity
@@ -204,6 +206,122 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void testOneImage() {
+        Thread tOne = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                loadImage(imgList.get(0), percentList.get(3));
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                //loadImage(imgList.get(2), percentList.get(3));
+
+            }
+        });
+        //tOne.start();
+        tOne.run();
+    }
+
+    private int x = 0;
+    private int y  = 0;
+
+
+    private Handler mHandler;
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mHandler = new Handler();
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                Log.d(MYTAG, "before sleep");
+                loadImage(imgList.get(x), percentList.get(y));
+                Log.d(MYTAG, "after sleep");
+                loadImage(imgList.get(2), percentList.get(3));
+
+            }
+        };
+
+//        mHandler.postDelayed(runnable, 1000);
+
+        //testOneImage();
+
+        threadAll.run();
+
+
+    }
+
+    private void testImages() throws InterruptedException {
+
+        Runnable img_runnable = new Runnable() {
+            @Override
+            public void run() {
+
+                for (final String imgBase : imgList) {
+                    for (final int imgQuality : percentList) {
+                        android.os.SystemClock.sleep(3000);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                loadImage(imgBase, imgQuality);
+                            }
+                        });
+                    }
+                }
+
+            }
+        };
+
+//        Thread t = new Thread(img_runnable);
+//
+//        int img_base_max = imgList.size();
+//        int img_percent_max = percentList.size();
+//
+//        for (int img_base_index = 0; img_base_index < img_base_max; img_base_index++) {
+//            for (int img_percent_index = 0;
+//                 img_percent_index < img_percent_max; img_percent_index++) {
+//                mHandler.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        loadImage(imgList.get(img_base_index), percentList.get(img_percent_index));
+//                    }
+//                }, (5000 * img_percent_max) * img_base_index + (img_percent_index * 5000));
+//
+//            }
+//        }
+
+
+
+    }
+    final Thread threadAll = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            for (final String imgBase : imgList) {
+                for (final int imgQuality : percentList) {
+                    sleepFunction();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            loadImage(imgBase, imgQuality);
+                        }
+                    });
+                }
+            }
+        }
+    });
+
+    private void sleepFunction() {
+        try {
+            threadAll.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
 
 
 }
