@@ -42,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
     private int mSelectedPercentage;
     private String mSelectedImgName;
 
+    ArrayList<Img> mSingleSizeList = new ArrayList<>();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +75,12 @@ public class MainActivity extends AppCompatActivity {
         percentList.add(60);
         percentList.add(80);
         percentList.add(100);
+
+        mSingleSizeList.add(new Img("a", 20));
+        mSingleSizeList.add(new Img("b", 40));
+        mSingleSizeList.add(new Img("b", 60));
+        mSingleSizeList.add(new Img("c", 80));
+        mSingleSizeList.add(new Img("b1", 100));
 
 
 //        for (String name: imgList
@@ -136,10 +145,18 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public String sizeInKB(File file){
+        long size = file.length();
+
+        return  String.valueOf(size/1024);
+    }
+
     private void loadImage(String imgName, int percent) {
 
         String fileName = imgName + "." + percent + ".jpg";
         File img = new File(SDCARD_PICTURES + fileName);
+
+
 
         //INSTRUMENTATION: insert before (1 line)
         long startnow = android.os.SystemClock.uptimeMillis();
@@ -157,7 +174,8 @@ public class MainActivity extends AppCompatActivity {
         }
         //LOG RESULTS
         Log.d(MYTAG, "--" + responsiveness + "--" + duration + "--" + "ms" + "--"
-                + fileName + "--" + img.length() + "--" + android.os.Build.MODEL);
+                + fileName + "--" + img.length() + "--" + android.os.Build.MODEL +
+                "--" + sizeInKB(img));
 
         imageView.setImageBitmap(bitmap);
         textView.setText(responsiveness + duration + " ms\n");
@@ -250,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
 
         //testOneImage();
 
-        threadAll.run();
+        threadSameSize.run();
 
 
     }
@@ -313,6 +331,25 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     });
+
+
+
+    final Thread threadSameSize = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            for (final Img img: mSingleSizeList) {
+                    sleepFunction();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            loadImage(img.getmBase(), img.getSize());
+                        }
+                    });
+
+            }
+        }
+    });
+
 
     private void sleepFunction() {
         try {
