@@ -29,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String MYTAG = "RESPDROID_DYNAMIC";
     public static final String SDCARD_PICTURES = "/sdcard/Pictures/";
+    public static final int DEADLINE_HARD = 100;
+    public static final int DEADLINE_SOFT = 200;
     private ImageView imageView;
     private TextView textView;
 
@@ -60,10 +62,10 @@ public class MainActivity extends AppCompatActivity {
 
         verifyStoragePermissions(this);
 
-        imgList.add("a");
-        imgList.add("b");
-        imgList.add("c");
-        imgList.add("b1");
+//        imgList.add("a");
+//        imgList.add("b");
+//        imgList.add("c");
+//        imgList.add("b1");
 
         percentList.add(1);
         percentList.add(5);
@@ -157,25 +159,33 @@ public class MainActivity extends AppCompatActivity {
         File img = new File(SDCARD_PICTURES + fileName);
 
 
+        CharSequence dateTime = android.text.format.DateFormat
+                .format("yyyy-MM-dd hh:mm:ss", new java.util.Date());
 
         //INSTRUMENTATION: insert before (1 line)
         long startnow = android.os.SystemClock.uptimeMillis();
+//        BitmapFactory.Options options = new BitmapFactory.Options();
 
+//        This is the function being instrumented
         Bitmap bitmap = BitmapFactory.decodeFile(img.getAbsolutePath());
+
 
         //INSTRUMENTATION: insert after (10 lines)
         long endnow = android.os.SystemClock.uptimeMillis();
         long duration = endnow - startnow;
         String responsiveness = "responsive: ";
-        if (duration > 100 && duration < 200) {
+        if (duration > DEADLINE_HARD && duration < DEADLINE_SOFT) {
             responsiveness = "soft unresponsive execution: ";
-        } else if (duration >= 200) {
+        } else if (duration >= DEADLINE_HARD) {
             responsiveness = "hard unresponsive execution: ";
         }
         //LOG RESULTS
         Log.d(MYTAG, "--" + responsiveness + "--" + duration + "--" + "ms" + "--"
-                + fileName + "--" + img.length() + "--" + android.os.Build.MODEL +
-                "--" + sizeInKB(img));
+                + fileName + "--" + img.length() + "--" + android.os.Build.MODEL
+                + "--" + sizeInKB(img) + "--" + bitmap.getWidth() + "--" + bitmap.getHeight()
+                + "--" + dateTime);
+
+
 
         imageView.setImageBitmap(bitmap);
         textView.setText(responsiveness + duration + " ms\n");
@@ -268,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
 
         //testOneImage();
 
-        threadSameSize.run();
+        threadAll.run();
 
 
     }
