@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +19,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.campiador.respdroid.model.Operation;
+import com.campiador.respdroid.model.RespNode;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -62,10 +66,10 @@ public class MainActivity extends AppCompatActivity {
 
         verifyStoragePermissions(this);
 
-//        imgList.add("a");
-//        imgList.add("b");
-//        imgList.add("c");
-//        imgList.add("b1");
+        imgList.add("a");
+        imgList.add("b");
+        imgList.add("c");
+        imgList.add("b1");
 
         percentList.add(1);
         percentList.add(5);
@@ -147,10 +151,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public String sizeInKB(File file){
+    public int sizeInKB(File file){
         long size = file.length();
 
-        return  String.valueOf(size/1024);
+        return (int) (size/1024);
     }
 
     private void loadImage(String imgName, int percent) {
@@ -179,6 +183,19 @@ public class MainActivity extends AppCompatActivity {
         } else if (duration >= DEADLINE_HARD) {
             responsiveness = "hard unresponsive execution: ";
         }
+
+        // Form results
+        RespNode respNode = new RespNode(0, 0, duration, String.valueOf(dateTime),
+                android.os.Build.MODEL, Operation.DECODE, fileName, img.length(), sizeInKB(img),
+                bitmap.getWidth(), bitmap.getHeight());
+
+        Log.d(MYTAG, "Respnode in client:");
+        Log.d(MYTAG, respNode.serialize_to_Json());
+        Log.d(MYTAG, respNode.toString());
+
+
+
+
         //LOG RESULTS
         Log.d(MYTAG, "--" + responsiveness + "--" + duration + "--" + "ms" + "--"
                 + fileName + "--" + img.length() + "--" + android.os.Build.MODEL
