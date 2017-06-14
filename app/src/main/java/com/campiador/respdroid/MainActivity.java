@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
 
 //        Log.d(MYTAG, "Respnode in client:");
         Log.d(MYTAG, respNode.serialize_to_Json());
-//        Log.d(MYTAG, respNode.toString());
+//        Log.d(MYTAG, respNode.toString())
 
 
 
