@@ -66,21 +66,21 @@ public class MainActivity extends AppCompatActivity {
 
         verifyStoragePermissions(this);
 
-        imgList.add("a");
+//        imgList.add("a");
         imgList.add("b");
-        imgList.add("c");
-        imgList.add("b1");
+//        imgList.add("c");
+//        imgList.add("b1");
 
-        percentList.add(1);
-        percentList.add(5);
-        percentList.add(10);
-        percentList.add(20);
-        percentList.add(25);
-        percentList.add(30);
+//        percentList.add(1);
+//        percentList.add(5);
+//        percentList.add(10);
+//        percentList.add(20);
+//        percentList.add(25);
+//        percentList.add(30);
         percentList.add(40);
         percentList.add(60);
-        percentList.add(80);
-        percentList.add(100);
+//        percentList.add(80);
+//        percentList.add(100);
 
         mSingleSizeList.add(new Img("a", 20));
         mSingleSizeList.add(new Img("b", 40));
