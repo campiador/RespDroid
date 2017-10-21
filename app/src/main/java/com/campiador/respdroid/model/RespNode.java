@@ -8,6 +8,19 @@ import com.google.gson.Gson;
 
 public class RespNode {
 
+    public String getActivity_name() {
+        return activity_name;
+    }
+
+    public void setActivity_name(String activity_name) {
+        this.activity_name = activity_name;
+    }
+
+    private String activity_name;
+    private String app_name;
+    private String package_name;
+    private int app_version_code;
+    private String os_version_release_name;
     private int node_id;
     private int experiment_id;
     private long delay;
@@ -23,7 +36,8 @@ public class RespNode {
 
     public RespNode(int node_id, int experiment_id, long delay, String timestamp, String device,
                     String operation, String img_base, long img_perc, int img_sizeKB,
-                    int imgWidth, int imgHeight) {
+                    int imgWidth, int imgHeight, String app_name, String package_name,
+                    int app_version_code, String os_version_release_name, String acivity_name) {
         this.node_id = node_id;
         this.experiment_id = experiment_id;
         this.delay = delay;
@@ -36,6 +50,13 @@ public class RespNode {
         this.imgWidth = imgWidth;
         this.imgHeight = imgHeight;
         this.img_MPs = getImgHeight()* getImgHeight() / (float)1000000;
+
+        this.app_name = app_name;
+        this.package_name = package_name;
+        this.app_version_code = app_version_code;
+        this.os_version_release_name = os_version_release_name;
+        this.activity_name = acivity_name;
+
     }
 
 
@@ -46,6 +67,40 @@ public class RespNode {
     public void setNode_id(int node_id) {
         this.node_id = node_id;
     }
+
+    public String getApp_name() {
+        return app_name;
+    }
+
+    public void setAppName(String app_name) {
+        this.app_name = app_name;
+    }
+
+    public String getPackage_name() {
+        return package_name;
+    }
+
+    public void setPackage_name(String package_name) {
+        this.package_name = package_name;
+    }
+
+    public void setApp_version_code(int app_version_code) {
+        this.app_version_code = app_version_code;
+    }
+
+    public void setOs_version_release_name(String os_version_release_name) {
+        this.os_version_release_name = os_version_release_name;
+    }
+
+    public int getApp_version_code() {
+        return app_version_code;
+    }
+
+    public String getOs_version_release_name() {
+        return os_version_release_name;
+    }
+
+
 
     public int getExperiment_id() {
         return experiment_id;
@@ -133,7 +188,11 @@ public class RespNode {
         return "nid: " + node_id + ", xid: " + experiment_id + ", datetime: " + timestamp
         + ", device: " + device + ", delay: " + delay + ", operation: " + operation +
         ", imgbase: " + img_base + ", imgperc: " + img_perc + ", sizeKB: "
-        + img_sizeKB + ", Resolution: " + getImageResolution() + ", MPs: " + img_MPs;
+        + img_sizeKB + ", Resolution: " + getImageResolution() + ", MPs: " + img_MPs
+        + ", appname:" + app_name + ", package_name:" + package_name
+        + ", app_version_code:" + app_version_code
+        + ", os_version_release_name:" + os_version_release_name
+        + ", activity_name:" + activity_name;
     }
 
     private String getImageResolution() {

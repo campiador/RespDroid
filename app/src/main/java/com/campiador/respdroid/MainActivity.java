@@ -3,6 +3,8 @@ package com.campiador.respdroid;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -184,10 +186,31 @@ public class MainActivity extends AppCompatActivity {
             responsiveness = "hard unresponsive execution: ";
         }
 
+        int appVersionCode = 0;
+        try {
+            PackageInfo pInfo = this.getPackageManager().getPackageInfo(getPackageName(), 0);
+            String version = pInfo.versionName;
+            appVersionCode = pInfo.versionCode;
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        String activityName = "";
+        PackageManager packageManager = this.getPackageManager();
+        try {
+            ActivityInfo info = packageManager.getActivityInfo(this.getComponentName(), 0);
+            activityName = info.name;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
         // Form results
         RespNode respNode = new RespNode(0, 0, duration, String.valueOf(dateTime),
                 android.os.Build.MODEL, Operation.DECODE, fileName, img.length(), sizeInKB(img),
-                bitmap.getWidth(), bitmap.getHeight());
+                bitmap.getWidth(), bitmap.getHeight(), Utils.getApplicationName(getApplicationContext()),
+                getApplicationContext().getPackageName(), appVersionCode, Build.VERSION.RELEASE,
+                activityName);
 
 //        Log.d(MYTAG, "Respnode in client:");
         Log.d(MYTAG, respNode.serialize_to_Json());
@@ -280,16 +303,16 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         mHandler = new Handler();
 
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                Log.d(MYTAG, "before sleep");
-                loadImage(imgList.get(x), percentList.get(y));
-                Log.d(MYTAG, "after sleep");
-                loadImage(imgList.get(2), percentList.get(3));
-
-            }
-        };
+//        Runnable runnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                Log.d(MYTAG, "before sleep");
+//                loadImage(imgList.get(x), percentList.get(y));
+//                Log.d(MYTAG, "after sleep");
+//                loadImage(imgList.get(2), percentList.get(3));
+//
+//            }
+//        };
 
 //        mHandler.postDelayed(runnable, 1000);
 
