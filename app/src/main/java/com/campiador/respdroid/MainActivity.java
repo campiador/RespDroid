@@ -2,7 +2,6 @@ package com.campiador.respdroid;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -35,8 +34,14 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String MYTAG = "RESPDROID_DYNAMIC";
     public static final String SDCARD_PICTURES = "/sdcard/Pictures/";
+    public static final String SDCARD_PICTURES_SUN2012 = "/sdcard/Pictures/SUN2012/";
+    public static final String SDCARD_PICTURES_SUN2012_A = "/sdcard/Pictures/SUN2012/a/";
+    public static final String SDCARD_PICTURES_SUN2012_TEST = "/sdcard/Pictures/SUN2012/test/";
+    public static final String SDCARD_PICTURES_SUN2012_1MB_10MB = "/sdcard/Pictures/SUN2012/1mb_10mb/";
     public static final int DEADLINE_HARD = 100;
     public static final int DEADLINE_SOFT = 200;
+    // TODO: Eventually set this to 1000
+    public static final int SUBLIST_LIMIT = 10;
     private ImageView imageView;
     private TextView textView;
 
@@ -46,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     ArrayList<String> imgList = new ArrayList<>();
+    ArrayList<File> mSUN2012FileList = new ArrayList<>();
+    ArrayList<File> mSUN2012FileSubList;
     ArrayList<Integer> percentList = new ArrayList<>();
     private int mSelectedPercentage;
     private String mSelectedImgName;
@@ -99,6 +106,19 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        }
 
+        mSUN2012FileList = Utils.get_all_files(new File(SDCARD_PICTURES_SUN2012_1MB_10MB));
+        mSUN2012FileSubList = new ArrayList<File>(mSUN2012FileList.subList(0, SUBLIST_LIMIT));
+
+        Log.d(MYTAG, "onCreate: msublist: ");
+        for (File file : mSUN2012FileSubList
+                ) {
+        Log.d(MYTAG, "onCreate: msublistitem: " + file.getName());
+
+        }
+//        System.exit(1);
+
+//        mSUN2012FileList.add(flie)
+
 
         ArrayAdapter<Integer> percentAdapter = new ArrayAdapter<Integer>(this,
                 android.R.layout.simple_spinner_item, percentList);
@@ -121,15 +141,26 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        ArrayList<String> mSUN2012NameList = new ArrayList<>();
+        for (File file : mSUN2012FileList) {
+            mSUN2012NameList.add(file.getName());
+        }
+
+        ArrayList<String> mSUN2012NameSubList = new ArrayList<>();
+        for (File file : mSUN2012FileSubList) {
+            mSUN2012NameList.add(file.getName());
+        }
+
+
         ArrayAdapter<String> nameAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, imgList);
+                android.R.layout.simple_spinner_item, mSUN2012NameSubList);
         percentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner_file.setAdapter(nameAdapter);
 
         spinner_file.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mSelectedImgName = imgList.get(position);
+                mSelectedImgName = mSUN2012FileSubList.get(position).getName();
 
             }
 
@@ -144,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loadImage(mSelectedImgName, mSelectedPercentage);
+                loadImage(new File(mSelectedImgName));
             }
         });
 
@@ -159,10 +190,10 @@ public class MainActivity extends AppCompatActivity {
         return (int) (size/1024);
     }
 
-    private void loadImage(String imgName, int percent) {
+    private void loadImage(File file) {
 
-        String fileName = imgName + "." + percent + ".jpg";
-        File img = new File(SDCARD_PICTURES + fileName);
+
+        File img = file;
 
 
         CharSequence dateTime = android.text.format.DateFormat
@@ -170,10 +201,10 @@ public class MainActivity extends AppCompatActivity {
 
         //INSTRUMENTATION: insert before (1 line)
         long startnow = android.os.SystemClock.uptimeMillis();
-//        BitmapFactory.Options options = new BitmapFactory.Options();
 
 //        This is the function being instrumented
         Bitmap bitmap = BitmapFactory.decodeFile(img.getAbsolutePath());
+//        BitmapFactory.Options options = new BitmapFactory.Options();
 
 
         //INSTRUMENTATION: insert after (10 lines)
@@ -189,7 +220,6 @@ public class MainActivity extends AppCompatActivity {
         int appVersionCode = 0;
         try {
             PackageInfo pInfo = this.getPackageManager().getPackageInfo(getPackageName(), 0);
-            String version = pInfo.versionName;
             appVersionCode = pInfo.versionCode;
 
         } catch (PackageManager.NameNotFoundException e) {
@@ -205,9 +235,11 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+
+
         // Form results
         RespNode respNode = new RespNode(0, 0, duration, String.valueOf(dateTime),
-                android.os.Build.MODEL, Operation.DECODE, fileName, img.length(), sizeInKB(img),
+                android.os.Build.MODEL, Operation.DECODE, file.getName(), img.length(), sizeInKB(img),
                 bitmap.getWidth(), bitmap.getHeight(), Utils.getApplicationName(getApplicationContext()),
                 getApplicationContext().getPackageName(), appVersionCode, Build.VERSION.RELEASE,
                 activityName);
@@ -217,8 +249,6 @@ public class MainActivity extends AppCompatActivity {
 //        Log.d(MYTAG, respNode.toString())
 
 
-
-
 //        //LOG RESULTS
 //        Log.d(MYTAG, "--" + responsiveness + "--" + duration + "--" + "ms" + "--"
 //                + fileName + "--" + img.length() + "--" + android.os.Build.MODEL
@@ -226,10 +256,81 @@ public class MainActivity extends AppCompatActivity {
 //                + "--" + dateTime);
 
 
-
         imageView.setImageBitmap(bitmap);
         textView.setText(responsiveness + duration + " ms\n");
     }
+
+//    private void loadImage(String imgName, int percent) {
+//
+//        String fileName = imgName + "." + percent + ".jpg";
+//        File img = new File(SDCARD_PICTURES + fileName);
+//
+//
+//        CharSequence dateTime = android.text.format.DateFormat
+//                .format("yyyy-MM-dd hh:mm:ss", new java.util.Date());
+//
+//        //INSTRUMENTATION: insert before (1 line)
+//        long startnow = android.os.SystemClock.uptimeMillis();
+////        BitmapFactory.Options options = new BitmapFactory.Options();
+//
+////        This is the function being instrumented
+//        Bitmap bitmap = BitmapFactory.decodeFile(img.getAbsolutePath());
+//
+//
+//        //INSTRUMENTATION: insert after (10 lines)
+//        long endnow = android.os.SystemClock.uptimeMillis();
+//        long duration = endnow - startnow;
+//        String responsiveness = "responsive: ";
+//        if (duration > DEADLINE_HARD && duration < DEADLINE_SOFT) {
+//            responsiveness = "soft unresponsive execution: ";
+//        } else if (duration >= DEADLINE_HARD) {
+//            responsiveness = "hard unresponsive execution: ";
+//        }
+//
+//        int appVersionCode = 0;
+//        try {
+//            PackageInfo pInfo = this.getPackageManager().getPackageInfo(getPackageName(), 0);
+//            String version = pInfo.versionName;
+//            appVersionCode = pInfo.versionCode;
+//
+//        } catch (PackageManager.NameNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//
+//        String activityName = "";
+//        PackageManager packageManager = this.getPackageManager();
+//        try {
+//            ActivityInfo info = packageManager.getActivityInfo(this.getComponentName(), 0);
+//            activityName = info.name;
+//        } catch (PackageManager.NameNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//
+//        // Form results
+//        RespNode respNode = new RespNode(0, 0, duration, String.valueOf(dateTime),
+//                android.os.Build.MODEL, Operation.DECODE, fileName, img.length(), sizeInKB(img),
+//                bitmap.getWidth(), bitmap.getHeight(), Utils.getApplicationName(getApplicationContext()),
+//                getApplicationContext().getPackageName(), appVersionCode, Build.VERSION.RELEASE,
+//                activityName);
+//
+////        Log.d(MYTAG, "Respnode in client:");
+//        Log.d(MYTAG, respNode.serialize_to_Json());
+////        Log.d(MYTAG, respNode.toString())
+//
+//
+//
+//
+////        //LOG RESULTS
+////        Log.d(MYTAG, "--" + responsiveness + "--" + duration + "--" + "ms" + "--"
+////                + fileName + "--" + img.length() + "--" + android.os.Build.MODEL
+////                + "--" + sizeInKB(img) + "--" + bitmap.getWidth() + "--" + bitmap.getHeight()
+////                + "--" + dateTime);
+//
+//
+//
+//        imageView.setImageBitmap(bitmap);
+//        textView.setText(responsiveness + duration + " ms\n");
+//    }
 
     // Storage Permissions
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -274,34 +375,34 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void testOneImage() {
-        Thread tOne = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                loadImage(imgList.get(0), percentList.get(3));
-                try {
-                    Thread.sleep(10000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                //loadImage(imgList.get(2), percentList.get(3));
-
-            }
-        });
-        //tOne.start();
-        tOne.run();
-    }
+//    private void testOneImage() {
+//        Thread tOne = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                loadImage(imgList.get(0), percentList.get(3));
+//                try {
+//                    Thread.sleep(10000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                //loadImage(imgList.get(2), percentList.get(3));
+//
+//            }
+//        });
+//        //tOne.start();
+//        tOne.run();
+//    }
 
     private int x = 0;
     private int y  = 0;
 
 
-    private Handler mHandler;
+//    private Handler mHandler;
 
     @Override
     protected void onResume() {
         super.onResume();
-        mHandler = new Handler();
+//        mHandler = new Handler();
 
 //        Runnable runnable = new Runnable() {
 //            @Override
@@ -323,26 +424,26 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void testImages() throws InterruptedException {
-
-        Runnable img_runnable = new Runnable() {
-            @Override
-            public void run() {
-
-                for (final String imgBase : imgList) {
-                    for (final int imgQuality : percentList) {
-                        android.os.SystemClock.sleep(3000);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                loadImage(imgBase, imgQuality);
-                            }
-                        });
-                    }
-                }
-
-            }
-        };
+//    private void testImages() throws InterruptedException {
+//
+//        Runnable img_runnable = new Runnable() {
+//            @Override
+//            public void run() {
+//
+//                for (final String imgBase : imgList) {
+//                    for (final int imgQuality : percentList) {
+//                        android.os.SystemClock.sleep(3000);
+//                        runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                loadImage(imgBase, imgQuality);
+//                            }
+//                        });
+//                    }
+//                }
+//
+//            }
+//        };
 
 //        Thread t = new Thread(img_runnable);
 //
@@ -361,44 +462,44 @@ public class MainActivity extends AppCompatActivity {
 //
 //            }
 //        }
+//    }
 
-
-
-    }
     final Thread threadAll = new Thread(new Runnable() {
         @Override
         public void run() {
-            for (final String imgBase : imgList) {
-                for (final int imgQuality : percentList) {
+//            for (final String imgBase : imgList) {
+//                for (final int imgQuality : percentList) {
+            for (final File file : mSUN2012FileSubList) {
+
                     sleepFunction();
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            loadImage(imgBase, imgQuality);
-                        }
-                    });
-                }
+                            loadImage(file);
+
+                    }
+                });
             }
         }
     });
 
 
 
-    final Thread threadSameSize = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            for (final Img img: mSingleSizeList) {
-                    sleepFunction();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            loadImage(img.getmBase(), img.getSize());
-                        }
-                    });
-
-            }
-        }
-    });
+//    final Thread threadSameSize = new Thread(new Runnable() {
+//        @Override
+//        public void run() {
+//            for (final Img img: mSingleSizeList) {
+//                    sleepFunction();
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            loadImage(img.getmBase(), img.getSize());
+//                        }
+//                    });
+//
+//            }
+//        }
+//    });
 
 
     private void sleepFunction() {
@@ -409,6 +510,5 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
 
 }
