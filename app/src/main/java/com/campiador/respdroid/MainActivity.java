@@ -8,7 +8,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
-import android.os.Handler;
+import android.os.StrictMode;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -37,11 +37,14 @@ public class MainActivity extends AppCompatActivity {
     public static final String SDCARD_PICTURES_SUN2012 = "/sdcard/Pictures/SUN2012/";
     public static final String SDCARD_PICTURES_SUN2012_A = "/sdcard/Pictures/SUN2012/a/";
     public static final String SDCARD_PICTURES_SUN2012_TEST = "/sdcard/Pictures/SUN2012/test/";
+    public static final String SDCARD_PICTURES_SUN2012_300KB_999KB =
+            "/sdcard/Pictures/SUN2012/sun2012_300k_999k/";
     public static final String SDCARD_PICTURES_SUN2012_1MB_10MB = "/sdcard/Pictures/SUN2012/1mb_10mb/";
     public static final int DEADLINE_HARD = 100;
     public static final int DEADLINE_SOFT = 200;
     // TODO: Eventually set this to 1000
-    public static final int SUBLIST_LIMIT = 10;
+    public static final int SUBLIST_LIMIT = 900;
+    private static final boolean STRICT_MODE = false;
     private ImageView imageView;
     private TextView textView;
 
@@ -51,8 +54,14 @@ public class MainActivity extends AppCompatActivity {
 
 
     ArrayList<String> imgList = new ArrayList<>();
+    ArrayList<File> mSUN2012_1MB_10MB_FileList = new ArrayList<>();
+    ArrayList<File> mSUN2012_1MB_10MB_FileSubList;
     ArrayList<File> mSUN2012FileList = new ArrayList<>();
     ArrayList<File> mSUN2012FileSubList;
+
+    ArrayList<File> mSUN2012_300K_999K_FileList = new ArrayList<>();
+    ArrayList<File> mSUN2012_300K_999K_FileSubList;
+
     ArrayList<Integer> percentList = new ArrayList<>();
     private int mSelectedPercentage;
     private String mSelectedImgName;
@@ -62,6 +71,22 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        if (STRICT_MODE) {
+            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                    .detectDiskReads()
+                    .detectDiskWrites()
+                    .detectNetwork()   // or .detectAll() for all detectable problems
+                    .penaltyLog()
+                    .build());
+            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                    .detectLeakedSqlLiteObjects()
+                    .detectLeakedClosableObjects()
+                    .penaltyLog()
+                    .penaltyDeath()
+                    .build());
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -74,50 +99,28 @@ public class MainActivity extends AppCompatActivity {
 
 
         verifyStoragePermissions(this);
-
-//        imgList.add("a");
-        imgList.add("b");
-//        imgList.add("c");
-//        imgList.add("b1");
-
-//        percentList.add(1);
-//        percentList.add(5);
-//        percentList.add(10);
-//        percentList.add(20);
-//        percentList.add(25);
-//        percentList.add(30);
-        percentList.add(40);
-        percentList.add(60);
-//        percentList.add(80);
-//        percentList.add(100);
-
-        mSingleSizeList.add(new Img("a", 20));
-        mSingleSizeList.add(new Img("b", 40));
-        mSingleSizeList.add(new Img("b", 60));
-        mSingleSizeList.add(new Img("c", 80));
-        mSingleSizeList.add(new Img("b1", 100));
+        populate_lists();
 
 
-//        for (String name: imgList
-//             ) {
-//            for (int percentage: percentList
-//                 ) {
-//                loadImage(name, percentage);
-//            }
-//        }
+        mSUN2012_1MB_10MB_FileList = Utils.get_all_files(new File(SDCARD_PICTURES_SUN2012_1MB_10MB));
 
-        mSUN2012FileList = Utils.get_all_files(new File(SDCARD_PICTURES_SUN2012_1MB_10MB));
-        mSUN2012FileSubList = new ArrayList<File>(mSUN2012FileList.subList(0, SUBLIST_LIMIT));
+        mSUN2012_1MB_10MB_FileSubList = new ArrayList<File>(mSUN2012_1MB_10MB_FileList.subList(0, SUBLIST_LIMIT));
+
+        mSUN2012_300K_999K_FileList= Utils.get_all_files(new File(SDCARD_PICTURES_SUN2012_300KB_999KB));
+
+        mSUN2012_300K_999K_FileSubList= new ArrayList<File>(mSUN2012_300K_999K_FileList.subList(0, SUBLIST_LIMIT/2));
+
+
 
         Log.d(MYTAG, "onCreate: msublist: ");
-        for (File file : mSUN2012FileSubList
+        for (File file : mSUN2012_1MB_10MB_FileSubList
                 ) {
         Log.d(MYTAG, "onCreate: msublistitem: " + file.getName());
 
         }
 //        System.exit(1);
 
-//        mSUN2012FileList.add(flie)
+//        mSUN2012_1MB_10MB_FileList.add(flie)
 
 
         ArrayAdapter<Integer> percentAdapter = new ArrayAdapter<Integer>(this,
@@ -142,12 +145,12 @@ public class MainActivity extends AppCompatActivity {
 
 
         ArrayList<String> mSUN2012NameList = new ArrayList<>();
-        for (File file : mSUN2012FileList) {
+        for (File file : mSUN2012_1MB_10MB_FileList) {
             mSUN2012NameList.add(file.getName());
         }
 
         ArrayList<String> mSUN2012NameSubList = new ArrayList<>();
-        for (File file : mSUN2012FileSubList) {
+        for (File file : mSUN2012_1MB_10MB_FileSubList) {
             mSUN2012NameList.add(file.getName());
         }
 
@@ -160,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
         spinner_file.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mSelectedImgName = mSUN2012FileSubList.get(position).getName();
+                mSelectedImgName = mSUN2012_1MB_10MB_FileSubList.get(position).getName();
 
             }
 
@@ -182,6 +185,30 @@ public class MainActivity extends AppCompatActivity {
 //    testImages();
 //        testOneImage();
 
+    }
+
+    private void populate_lists() {
+        //        imgList.add("a");
+        imgList.add("b");
+//        imgList.add("c");
+//        imgList.add("b1");
+
+//        percentList.add(1);
+//        percentList.add(5);
+//        percentList.add(10);
+//        percentList.add(20);
+//        percentList.add(25);
+//        percentList.add(30);
+        percentList.add(40);
+        percentList.add(60);
+//        percentList.add(80);
+//        percentList.add(100);
+
+        mSingleSizeList.add(new Img("a", 20));
+        mSingleSizeList.add(new Img("b", 40));
+        mSingleSizeList.add(new Img("b", 60));
+        mSingleSizeList.add(new Img("c", 80));
+        mSingleSizeList.add(new Img("b1", 100));
     }
 
     public int sizeInKB(File file){
@@ -469,7 +496,7 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
 //            for (final String imgBase : imgList) {
 //                for (final int imgQuality : percentList) {
-            for (final File file : mSUN2012FileSubList) {
+            for (final File file : mSUN2012_1MB_10MB_FileSubList) {
 
                     sleepFunction();
                     runOnUiThread(new Runnable() {
