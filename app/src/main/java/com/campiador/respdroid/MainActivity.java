@@ -102,13 +102,14 @@ public class MainActivity extends AppCompatActivity {
         populate_lists();
 
 
+
         mSUN2012_1MB_10MB_FileList = Utils.get_all_files(new File(SDCARD_PICTURES_SUN2012_1MB_10MB));
 
         mSUN2012_1MB_10MB_FileSubList = new ArrayList<File>(mSUN2012_1MB_10MB_FileList.subList(0, SUBLIST_LIMIT));
 
-        mSUN2012_300K_999K_FileList= Utils.get_all_files(new File(SDCARD_PICTURES_SUN2012_300KB_999KB));
-
-        mSUN2012_300K_999K_FileSubList= new ArrayList<File>(mSUN2012_300K_999K_FileList.subList(0, SUBLIST_LIMIT/2));
+//        mSUN2012_300K_999K_FileList= Utils.get_all_files(new File(SDCARD_PICTURES_SUN2012_300KB_999KB));
+//
+//        mSUN2012_300K_999K_FileSubList= new ArrayList<File>(mSUN2012_300K_999K_FileList.subList(0, SUBLIST_LIMIT/2));
 
 
 
@@ -229,8 +230,10 @@ public class MainActivity extends AppCompatActivity {
         //INSTRUMENTATION: insert before (1 line)
         long startnow = android.os.SystemClock.uptimeMillis();
 
+        String absolutePath = img.getAbsolutePath();
+
 //        This is the function being instrumented
-        Bitmap bitmap = BitmapFactory.decodeFile(img.getAbsolutePath());
+        Bitmap bitmap = BitmapFactory.decodeFile(absolutePath);
 //        BitmapFactory.Options options = new BitmapFactory.Options();
 
 
@@ -284,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         imageView.setImageBitmap(bitmap);
-        textView.setText(responsiveness + duration + " ms\n");
+//        textView.setText(responsiveness + duration + " ms\n");
     }
 
 //    private void loadImage(String imgName, int percent) {

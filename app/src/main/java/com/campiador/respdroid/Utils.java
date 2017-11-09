@@ -27,6 +27,7 @@ public class Utils {
 
         File[] list = root.listFiles();
 
+
         for (File file : list) {
             if (file.isDirectory()) {
                 Log.d(MainActivity.MYTAG, "Dir: " + file.getAbsoluteFile());
