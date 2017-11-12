@@ -39,12 +39,13 @@ public class MainActivity extends AppCompatActivity {
     public static final String SDCARD_PICTURES_SUN2012_TEST = "/sdcard/Pictures/SUN2012/test/";
     public static final String SDCARD_PICTURES_SUN2012_300KB_999KB =
             "/sdcard/Pictures/SUN2012/sun2012_300k_999k/";
-    public static final String SDCARD_PICTURES_SUN2012_1MB_10MB = "/sdcard/Pictures/SUN2012/1mb_10mb/";
+//    public static final String SDCARD_PICTURES_SUN2012_1MB_10MB = "/sdcard/Pictures/SUN2012/1mb_10mb/";
     public static final int DEADLINE_HARD = 100;
     public static final int DEADLINE_SOFT = 200;
     // TODO: Eventually set this to 1000
-    public static final int SUBLIST_LIMIT = 900;
+    public static final int SUBLIST_LIMIT = 1000;
     private static final boolean STRICT_MODE = false;
+    public static final String RESPDROID_END_ITER = "end_iter";
     private ImageView imageView;
     private TextView textView;
 
@@ -54,10 +55,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     ArrayList<String> imgList = new ArrayList<>();
-    ArrayList<File> mSUN2012_1MB_10MB_FileList = new ArrayList<>();
-    ArrayList<File> mSUN2012_1MB_10MB_FileSubList;
-    ArrayList<File> mSUN2012FileList = new ArrayList<>();
-    ArrayList<File> mSUN2012FileSubList;
+//    ArrayList<File> mSUN2012_1MB_10MB_FileList = new ArrayList<>();
+//    ArrayList<File> mSUN2012_1MB_10MB_FileSubList;
+//    ArrayList<File> mSUN2012FileList = new ArrayList<>();
+//    ArrayList<File> mSUN2012FileSubList;
 
     ArrayList<File> mSUN2012_300K_999K_FileList = new ArrayList<>();
     ArrayList<File> mSUN2012_300K_999K_FileSubList;
@@ -102,23 +103,22 @@ public class MainActivity extends AppCompatActivity {
         populate_lists();
 
 
-
-        mSUN2012_1MB_10MB_FileList = Utils.get_all_files(new File(SDCARD_PICTURES_SUN2012_1MB_10MB));
-
-        mSUN2012_1MB_10MB_FileSubList = new ArrayList<File>(mSUN2012_1MB_10MB_FileList.subList(0, SUBLIST_LIMIT));
-
-//        mSUN2012_300K_999K_FileList= Utils.get_all_files(new File(SDCARD_PICTURES_SUN2012_300KB_999KB));
 //
-//        mSUN2012_300K_999K_FileSubList= new ArrayList<File>(mSUN2012_300K_999K_FileList.subList(0, SUBLIST_LIMIT/2));
+//        mSUN2012_1MB_10MB_FileList = Utils.get_all_files(new File(SDCARD_PICTURES_SUN2012_1MB_10MB));
+//
+//        mSUN2012_1MB_10MB_FileSubList = new ArrayList<File>(mSUN2012_1MB_10MB_FileList.subList(0, SUBLIST_LIMIT));
+
+        mSUN2012_300K_999K_FileList= Utils.get_all_files(new File(SDCARD_PICTURES_SUN2012_300KB_999KB));
+//
+        mSUN2012_300K_999K_FileSubList= new ArrayList<File>(mSUN2012_300K_999K_FileList.subList(0, SUBLIST_LIMIT/2));
 
 
 
-        Log.d(MYTAG, "onCreate: msublist: ");
-        for (File file : mSUN2012_1MB_10MB_FileSubList
-                ) {
-        Log.d(MYTAG, "onCreate: msublistitem: " + file.getName());
-
-        }
+//        Log.d(MYTAG, "onCreate: msublist: ");
+//        for (File file : mSUN2012_1MB_10MB_FileSubList
+//                ) {
+//        Log.d(MYTAG, "onCreate: msublistitem: " + file.getName());
+//        }
 //        System.exit(1);
 
 //        mSUN2012_1MB_10MB_FileList.add(flie)
@@ -145,43 +145,39 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        ArrayList<String> mSUN2012NameList = new ArrayList<>();
-        for (File file : mSUN2012_1MB_10MB_FileList) {
-            mSUN2012NameList.add(file.getName());
-        }
-
-        ArrayList<String> mSUN2012NameSubList = new ArrayList<>();
-        for (File file : mSUN2012_1MB_10MB_FileSubList) {
-            mSUN2012NameList.add(file.getName());
-        }
+//        ArrayList<String> mSUN2012NameList = new ArrayList<>();
+//        for (File file : mSUN2012_1MB_10MB_FileList) {
+//            mSUN2012NameList.add(file.getName());
+//        }
 
 
-        ArrayAdapter<String> nameAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, mSUN2012NameSubList);
-        percentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner_file.setAdapter(nameAdapter);
-
-        spinner_file.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mSelectedImgName = mSUN2012_1MB_10MB_FileSubList.get(position).getName();
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-
-
-        });
-
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadImage(new File(mSelectedImgName));
-            }
-        });
+//
+//        ArrayAdapter<String> nameAdapter = new ArrayAdapter<String>(this,
+//                android.R.layout.simple_spinner_item, mSUN2012NameSubList);
+//        percentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        spinner_file.setAdapter(nameAdapter);
+//
+//        spinner_file.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+////                mSelectedImgName = mSUN2012_1MB_10MB_FileSubList.get(position).getName();
+//
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//
+//            }
+//
+//
+//        });
+//
+//        button.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                loadImage(new File(mSelectedImgName));
+//            }
+//        });
 
 //    testImages();
 //        testOneImage();
@@ -450,6 +446,8 @@ public class MainActivity extends AppCompatActivity {
         //testOneImage();
 
         threadAll.run();
+//        Note: this helps signal end of simulation, instead of waiting for the timeout
+        Log.d(MYTAG, RESPDROID_END_ITER);
 
 
     }
@@ -499,7 +497,7 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
 //            for (final String imgBase : imgList) {
 //                for (final int imgQuality : percentList) {
-            for (final File file : mSUN2012_1MB_10MB_FileSubList) {
+            for (final File file : mSUN2012_300K_999K_FileSubList) {
 
                     sleepFunction();
                     runOnUiThread(new Runnable() {
