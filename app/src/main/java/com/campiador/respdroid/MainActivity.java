@@ -227,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
         String operationType = Operation.DISPLAY;
 
 
-//        BEFORE
+//        BEFORE Instrumentation
         InstrumentDisplayImageBefore instrumentDisplayImageBefore = new InstrumentDisplayImageBefore(img).invoke();
         long startnow = instrumentDisplayImageBefore.getStartnow();
         CharSequence dateTime = instrumentDisplayImageBefore.getDateTime();
@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
         imageView.setImageBitmap(bitmap);
 
 
-//      After
+//      After Instrumentation
         instrumentDisplayImageAfter(img, bitmap, operationType, startnow, dateTime);
 
 
