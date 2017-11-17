@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.StrictMode;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -37,9 +38,9 @@ public class MainActivity extends AppCompatActivity {
     public static final String SDCARD_PICTURES_SUN2012 = "/sdcard/Pictures/SUN2012/";
     public static final String SDCARD_PICTURES_SUN2012_A = "/sdcard/Pictures/SUN2012/a/";
     public static final String SDCARD_PICTURES_SUN2012_TEST = "/sdcard/Pictures/SUN2012/test/";
-    public static final String SDCARD_PICTURES_SUN2012_300KB_999KB =
-            "/sdcard/Pictures/SUN2012/sun2012_300k_999k/";
-//    public static final String SDCARD_PICTURES_SUN2012_1MB_10MB = "/sdcard/Pictures/SUN2012/1mb_10mb/";
+//    public static final String SDCARD_PICTURES_SUN2012_300KB_999KB =
+//            "/sdcard/Pictures/SUN2012/sun2012_300k_999k/";
+    public static final String SDCARD_PICTURES_SUN2012_1MB_10MB = "/sdcard/Pictures/SUN2012/1mb_10mb/";
     public static final int DEADLINE_HARD = 100;
     public static final int DEADLINE_SOFT = 200;
     // TODO: Eventually set this to 1000
@@ -55,13 +56,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     ArrayList<String> imgList = new ArrayList<>();
-//    ArrayList<File> mSUN2012_1MB_10MB_FileList = new ArrayList<>();
-//    ArrayList<File> mSUN2012_1MB_10MB_FileSubList;
+    ArrayList<File> mSUN2012_1MB_10MB_FileList = new ArrayList<>();
+    ArrayList<File> mSUN2012_1MB_10MB_FileSubList;
 //    ArrayList<File> mSUN2012FileList = new ArrayList<>();
 //    ArrayList<File> mSUN2012FileSubList;
 
-    ArrayList<File> mSUN2012_300K_999K_FileList = new ArrayList<>();
-    ArrayList<File> mSUN2012_300K_999K_FileSubList;
+//    ArrayList<File> mSUN2012_300K_999K_FileList = new ArrayList<>();
+//    ArrayList<File> mSUN2012_300K_999K_FileSubList;
 
     ArrayList<Integer> percentList = new ArrayList<>();
     private int mSelectedPercentage;
@@ -104,13 +105,14 @@ public class MainActivity extends AppCompatActivity {
 
 
 //
-//        mSUN2012_1MB_10MB_FileList = Utils.get_all_files(new File(SDCARD_PICTURES_SUN2012_1MB_10MB));
-//
-//        mSUN2012_1MB_10MB_FileSubList = new ArrayList<File>(mSUN2012_1MB_10MB_FileList.subList(0, SUBLIST_LIMIT));
+        mSUN2012_1MB_10MB_FileList = Utils.get_all_files(new File(SDCARD_PICTURES_SUN2012_1MB_10MB));
 
-        mSUN2012_300K_999K_FileList= Utils.get_all_files(new File(SDCARD_PICTURES_SUN2012_300KB_999KB));
-//
-        mSUN2012_300K_999K_FileSubList= new ArrayList<File>(mSUN2012_300K_999K_FileList.subList(0, SUBLIST_LIMIT/2));
+        mSUN2012_1MB_10MB_FileSubList =
+                new ArrayList<File>(mSUN2012_1MB_10MB_FileList.subList(0, SUBLIST_LIMIT));
+
+//        mSUN2012_300K_999K_FileList= Utils.get_all_files(new File(SDCARD_PICTURES_SUN2012_300KB_999KB));
+////
+//        mSUN2012_300K_999K_FileSubList= new ArrayList<File>(mSUN2012_300K_999K_FileList.subList(0, SUBLIST_LIMIT/2));
 
 
 
@@ -214,125 +216,32 @@ public class MainActivity extends AppCompatActivity {
         return (int) (size/1024);
     }
 
-    private void loadImage(File imgFile) {
-
-
-        String operationType = Operation.DECODE;
-
-
-        CharSequence dateTime = android.text.format.DateFormat
-                .format("yyyy-MM-dd hh:mm:ss", new java.util.Date());
-
-        //INSTRUMENTATION: insert before (1 line)
-        long startnow = android.os.SystemClock.uptimeMillis();
-
-        String absolutePath = imgFile.getAbsolutePath();
-
-//        This is the function being instrumented
-        Bitmap bitmap = BitmapFactory.decodeFile(absolutePath);
-//        BitmapFactory.Options options = new BitmapFactory.Options();
-
-
-        //INSTRUMENTATION: insert after (10 lines)
-        long endnow = android.os.SystemClock.uptimeMillis();
-        long duration = endnow - startnow;
-        String responsiveness = "responsive: ";
-        if (duration > DEADLINE_HARD && duration < DEADLINE_SOFT) {
-            responsiveness = "soft unresponsive execution: ";
-        } else if (duration >= DEADLINE_HARD) {
-            responsiveness = "hard unresponsive execution: ";
-        }
-
-        int appVersionCode = 0;
-        try {
-            PackageInfo pInfo = this.getPackageManager().getPackageInfo(getPackageName(), 0);
-            appVersionCode = pInfo.versionCode;
-
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        String activityName = "";
-        PackageManager packageManager = this.getPackageManager();
-        try {
-            ActivityInfo info = packageManager.getActivityInfo(this.getComponentName(), 0);
-            activityName = info.name;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-
-
-
-        // Form results
-        RespNode respNode = new RespNode(0, 0, duration, String.valueOf(dateTime),
-                android.os.Build.MODEL, operationType, imgFile.getName(), imgFile.length(), sizeInKB(imgFile),
-                bitmap.getWidth(), bitmap.getHeight(), Utils.getApplicationName(getApplicationContext()),
-                getApplicationContext().getPackageName(), appVersionCode, Build.VERSION.RELEASE,
-                activityName);
-
-        Log.d(MYTAG, respNode.serialize_to_Json());
-
-
-        displayImage(bitmap, imgFile);
+    private Bitmap loadImage(File imgFile) {
+        Bitmap bitmap = instrumentDecodeBitmap(imgFile);
+        return bitmap;
     }
 
-    private void displayImage(Bitmap bitmap, File img) {
 
-        CharSequence dateTime = android.text.format.DateFormat
-                .format("yyyy-MM-dd hh:mm:ss", new java.util.Date());
-
-
-        String absolutePath = img.getAbsolutePath();
+    private void displayImage(File img, Bitmap bitmap) {
 
         String operationType = Operation.DISPLAY;
 
 
-        //INSTRUMENTATION: insert before (1 line)
-        long startnow = android.os.SystemClock.uptimeMillis();
+//        BEFORE
+        InstrumentDisplayImageBefore instrumentDisplayImageBefore = new InstrumentDisplayImageBefore(img).invoke();
+        long startnow = instrumentDisplayImageBefore.getStartnow();
+        CharSequence dateTime = instrumentDisplayImageBefore.getDateTime();
 
         imageView.setImageBitmap(bitmap);
 
 
-        //INSTRUMENTATION: insert after (10 lines)
-        long endnow = android.os.SystemClock.uptimeMillis();
-        long duration = endnow - startnow;
-        String responsiveness = "responsive: ";
-        if (duration > DEADLINE_HARD && duration < DEADLINE_SOFT) {
-            responsiveness = "soft unresponsive execution: ";
-        } else if (duration >= DEADLINE_HARD) {
-            responsiveness = "hard unresponsive execution: ";
-        }
+//      After
+        instrumentDisplayImageAfter(img, bitmap, operationType, startnow, dateTime);
 
-        int appVersionCode = 0;
-        try {
-            PackageInfo pInfo = this.getPackageManager().getPackageInfo(getPackageName(), 0);
-            appVersionCode = pInfo.versionCode;
-
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        String activityName = "";
-        PackageManager packageManager = this.getPackageManager();
-        try {
-            ActivityInfo info = packageManager.getActivityInfo(this.getComponentName(), 0);
-            activityName = info.name;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-
-
-
-        // Form results
-        RespNode respNode = new RespNode(0, 0, duration, String.valueOf(dateTime),
-                android.os.Build.MODEL, operationType, img.getName(), img.length(), sizeInKB(img),
-                bitmap.getWidth(), bitmap.getHeight(), Utils.getApplicationName(getApplicationContext()),
-                getApplicationContext().getPackageName(), appVersionCode, Build.VERSION.RELEASE,
-                activityName);
-
-        Log.d(MYTAG, respNode.serialize_to_Json());
 
     }
+
+
 
 //    private void loadImage(String imgName, int percent) {
 //
@@ -545,13 +454,14 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
 //            for (final String imgBase : imgList) {
 //                for (final int imgQuality : percentList) {
-            for (final File file : mSUN2012_300K_999K_FileSubList) {
+            for (final File file : mSUN2012_1MB_10MB_FileSubList) {
 
                     sleepFunction();
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            loadImage(file);
+                            Bitmap bmp = loadImage(file);
+                            displayImage(file, bmp);
 
                     }
                 });
@@ -568,6 +478,100 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+    }
+
+    private class InstrumentDisplayImageBefore {
+        private File img;
+        private CharSequence dateTime;
+        private long startnow;
+
+        public InstrumentDisplayImageBefore(File img) {
+            this.img = img;
+        }
+
+        public CharSequence getDateTime() {
+            return dateTime;
+        }
+
+        public long getStartnow() {
+            return startnow;
+        }
+
+        public InstrumentDisplayImageBefore invoke() {
+            dateTime = android.text.format.DateFormat
+                    .format("yyyy-MM-dd hh:mm:ss", new java.util.Date());
+
+
+            String absolutePath = img.getAbsolutePath();
+
+
+            //INSTRUMENTATION: insert before (1 line)
+            startnow = android.os.SystemClock.uptimeMillis();
+            return this;
+        }
+    }
+
+    private void instrumentDisplayImageAfter(File img, Bitmap bitmap, String operationType, long startnow, CharSequence dateTime) {
+        //INSTRUMENTATION: insert after (10 lines)
+        long endnow = android.os.SystemClock.uptimeMillis();
+        long duration = endnow - startnow;
+        String responsiveness = "responsive: ";
+        if (duration > DEADLINE_HARD && duration < DEADLINE_SOFT) {
+            responsiveness = "soft unresponsive execution: ";
+        } else if (duration >= DEADLINE_HARD) {
+            responsiveness = "hard unresponsive execution: ";
+        }
+
+        int appVersionCode = 0;
+        try {
+            PackageInfo pInfo = this.getPackageManager().getPackageInfo(getPackageName(), 0);
+            appVersionCode = pInfo.versionCode;
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        String activityName = "";
+        PackageManager packageManager = this.getPackageManager();
+        try {
+            ActivityInfo info = packageManager.getActivityInfo(this.getComponentName(), 0);
+            activityName = info.name;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
+        // Form results
+        RespNode respNode = new RespNode(0, 0, duration, String.valueOf(dateTime),
+                Build.MODEL, operationType, img.getName(), img.length(), sizeInKB(img),
+                bitmap.getWidth(), bitmap.getHeight(), Utils.getApplicationName(getApplicationContext()),
+                getApplicationContext().getPackageName(), appVersionCode, Build.VERSION.RELEASE,
+                activityName);
+
+        Log.d(MYTAG, respNode.serialize_to_Json());
+    }
+
+    @NonNull
+    private Bitmap instrumentDecodeBitmap(File imgFile) {
+        String operationType = Operation.DECODE;
+
+
+        CharSequence dateTime = android.text.format.DateFormat
+                .format("yyyy-MM-dd hh:mm:ss", new java.util.Date());
+
+        //INSTRUMENTATION: insert before (1 line)
+        long startnow = android.os.SystemClock.uptimeMillis();
+
+        String absolutePath = imgFile.getAbsolutePath();
+
+//        This is the function being instrumented
+        Bitmap bitmap = BitmapFactory.decodeFile(absolutePath);
+//        BitmapFactory.Options options = new BitmapFactory.Options();
+
+
+        //INSTRUMENTATION: insert after (10 lines)
+        instrumentDisplayImageAfter(imgFile, bitmap, operationType, startnow, dateTime);
+        return bitmap;
     }
 
 }
