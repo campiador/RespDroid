@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int DEADLINE_HARD = 100;
     public static final int DEADLINE_SOFT = 200;
     // TODO: Eventually set this to 1000
-    public static final int SUBLIST_LIMIT = 1000;
+    public static final int SUBLIST_LIMIT = 100;
     private static final boolean STRICT_MODE = false;
     public static final String RESPDROID_END_ITER = "end_iter";
     private ImageView imageView;
@@ -214,10 +214,10 @@ public class MainActivity extends AppCompatActivity {
         return (int) (size/1024);
     }
 
-    private void loadImage(File file) {
+    private void loadImage(File imgFile) {
 
 
-        File img = file;
+        String operationType = Operation.DECODE;
 
 
         CharSequence dateTime = android.text.format.DateFormat
@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
         //INSTRUMENTATION: insert before (1 line)
         long startnow = android.os.SystemClock.uptimeMillis();
 
-        String absolutePath = img.getAbsolutePath();
+        String absolutePath = imgFile.getAbsolutePath();
 
 //        This is the function being instrumented
         Bitmap bitmap = BitmapFactory.decodeFile(absolutePath);
@@ -265,25 +265,73 @@ public class MainActivity extends AppCompatActivity {
 
         // Form results
         RespNode respNode = new RespNode(0, 0, duration, String.valueOf(dateTime),
-                android.os.Build.MODEL, Operation.DECODE, file.getName(), img.length(), sizeInKB(img),
+                android.os.Build.MODEL, operationType, imgFile.getName(), imgFile.length(), sizeInKB(imgFile),
                 bitmap.getWidth(), bitmap.getHeight(), Utils.getApplicationName(getApplicationContext()),
                 getApplicationContext().getPackageName(), appVersionCode, Build.VERSION.RELEASE,
                 activityName);
 
-//        Log.d(MYTAG, "Respnode in client:");
         Log.d(MYTAG, respNode.serialize_to_Json());
-//        Log.d(MYTAG, respNode.toString())
 
 
-//        //LOG RESULTS
-//        Log.d(MYTAG, "--" + responsiveness + "--" + duration + "--" + "ms" + "--"
-//                + fileName + "--" + img.length() + "--" + android.os.Build.MODEL
-//                + "--" + sizeInKB(img) + "--" + bitmap.getWidth() + "--" + bitmap.getHeight()
-//                + "--" + dateTime);
+        displayImage(bitmap, imgFile);
+    }
 
+    private void displayImage(Bitmap bitmap, File img) {
+
+        CharSequence dateTime = android.text.format.DateFormat
+                .format("yyyy-MM-dd hh:mm:ss", new java.util.Date());
+
+
+        String absolutePath = img.getAbsolutePath();
+
+        String operationType = Operation.DISPLAY;
+
+
+        //INSTRUMENTATION: insert before (1 line)
+        long startnow = android.os.SystemClock.uptimeMillis();
 
         imageView.setImageBitmap(bitmap);
-//        textView.setText(responsiveness + duration + " ms\n");
+
+
+        //INSTRUMENTATION: insert after (10 lines)
+        long endnow = android.os.SystemClock.uptimeMillis();
+        long duration = endnow - startnow;
+        String responsiveness = "responsive: ";
+        if (duration > DEADLINE_HARD && duration < DEADLINE_SOFT) {
+            responsiveness = "soft unresponsive execution: ";
+        } else if (duration >= DEADLINE_HARD) {
+            responsiveness = "hard unresponsive execution: ";
+        }
+
+        int appVersionCode = 0;
+        try {
+            PackageInfo pInfo = this.getPackageManager().getPackageInfo(getPackageName(), 0);
+            appVersionCode = pInfo.versionCode;
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        String activityName = "";
+        PackageManager packageManager = this.getPackageManager();
+        try {
+            ActivityInfo info = packageManager.getActivityInfo(this.getComponentName(), 0);
+            activityName = info.name;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
+
+        // Form results
+        RespNode respNode = new RespNode(0, 0, duration, String.valueOf(dateTime),
+                android.os.Build.MODEL, operationType, img.getName(), img.length(), sizeInKB(img),
+                bitmap.getWidth(), bitmap.getHeight(), Utils.getApplicationName(getApplicationContext()),
+                getApplicationContext().getPackageName(), appVersionCode, Build.VERSION.RELEASE,
+                activityName);
+
+        Log.d(MYTAG, respNode.serialize_to_Json());
+
     }
 
 //    private void loadImage(String imgName, int percent) {
@@ -511,23 +559,6 @@ public class MainActivity extends AppCompatActivity {
         }
     });
 
-
-
-//    final Thread threadSameSize = new Thread(new Runnable() {
-//        @Override
-//        public void run() {
-//            for (final Img img: mSingleSizeList) {
-//                    sleepFunction();
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            loadImage(img.getmBase(), img.getSize());
-//                        }
-//                    });
-//
-//            }
-//        }
-//    });
 
 
     private void sleepFunction() {

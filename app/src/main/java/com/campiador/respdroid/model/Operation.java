@@ -11,6 +11,7 @@ public class Operation {
     public final static String ANIMATION = "Animation";
     public final static String NETWORK = "Network";
     public final static String GPS = "GPS";
+    public final static String DISPLAY = "Image Display";
 
 
 }
