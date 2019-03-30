@@ -1,7 +1,8 @@
 RespDroid
+
 Static/Dynamic Analysis Tool for Responsiveness Measurement Across Multiple Hardwares
 
-RespDroid models, measures, and predicts peformance bugs.
+RespDroid (1) models, (2) measures, and (3) predicts peformance bugs.
 
 1. Model
   - Every delay of over 100 milliseconds on the main thread (aka UI thread) of an app is modelled as a soft performance bug.
